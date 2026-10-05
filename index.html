@@ -10669,7 +10669,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     var file = null;
     try { file = new File([blob], name, { type: 'text/csv' }); } catch (e) {}
     if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
-      navigator.share({ files: [file], title: name }).then(function () {
+      navigator.share({ files: [file] }).then(function () {
         markExported(list); toast('書き出しました');
       }).catch(function (err) {
         if (err && err.name === 'AbortError') return;
