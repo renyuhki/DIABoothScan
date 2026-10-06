@@ -41,13 +41,20 @@
     }
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; }
+  /* 画面全体（document）はスクロールさせない。スクロールは .scroller の中だけ。
+     こうしておくと、上フリックでブラウザのバーが伸縮したり、ページ全体がずれたりしない */
+  html, body { margin: 0; height: 100%; overflow: hidden; overscroll-behavior: none; }
   body {
+    position: fixed; inset: 0; width: 100%;
     background: var(--bg); color: var(--ink);
     font-family: -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
     font-size: 16px; line-height: 1.6; -webkit-text-size-adjust: 100%;
-    padding-top: var(--safe-t);
-    padding-bottom: calc(var(--tab-h) + var(--safe-b) + 12px);
+  }
+  .app { position: absolute; inset: 0; display: flex; flex-direction: column; padding-top: var(--safe-t); }
+  .scroller {
+    flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto;
+    -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+    padding-bottom: 12px;
   }
   .wrap { max-width: 560px; margin: 0 auto; padding: 0 16px; }
   header.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0 8px; }
@@ -81,11 +88,11 @@
 
   /* ---- スキャン画面 ---- */
   .vf {
-    position: relative; width: 100%; aspect-ratio: 1 / 1; max-height: 52dvh;
+    position: relative; width: 100%; aspect-ratio: 1 / 1; max-height: 52vh; max-height: 52svh;
     background: var(--vf-bg); border-radius: 18px; overflow: hidden; margin: 0 auto;
     transition: height .2s ease;
   }
-  [data-found="yes"] .vf { aspect-ratio: auto; height: 30dvh; }
+  [data-found="yes"] .vf { aspect-ratio: auto; height: 30vh; height: 30svh; }
   .vf video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .brackets { position: absolute; inset: 14%; pointer-events: none; }
   [data-found="yes"] .brackets { inset: 10% 26%; }
@@ -116,7 +123,7 @@
   .result pre {
     margin: 0; white-space: pre-wrap; overflow-wrap: anywhere;
     font: inherit; font-size: 18px; font-weight: 600; line-height: 1.6; color: var(--heading);
-    max-height: 30dvh; overflow-y: auto;
+    max-height: 30vh; max-height: 30svh; overflow-y: auto;
   }
   .result .meta { margin: 8px 0 12px; color: var(--muted); font-size: 13px; }
   .result .acts { display: grid; grid-template-columns: 1fr; gap: 10px; }
@@ -163,10 +170,7 @@
   .foot { margin: 22px 0 8px; display: flex; justify-content: center; }
 
   /* ---- タブ ---- */
-  nav.tabs {
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
-    background: var(--tab-bg); padding-bottom: var(--safe-b);
-  }
+  nav.tabs { flex: none; background: var(--tab-bg); padding-bottom: var(--safe-b); }
   nav.tabs .in { max-width: 560px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; }
   .tab {
     height: var(--tab-h); border: 0; background: transparent; color: var(--tab-ink);
@@ -187,6 +191,8 @@
 </style>
 </head>
 <body>
+<div class="app">
+<div class="scroller" id="scroller">
 <div class="wrap">
   <header class="top">
     <div>
@@ -250,6 +256,7 @@
     </section>
   </main>
 </div>
+</div>
 
 <nav class="tabs" aria-label="画面の切り替え">
   <div class="in" role="tablist">
@@ -257,6 +264,7 @@
     <button type="button" class="tab" id="tabList" role="tab" aria-selected="false">一覧<span class="badge" id="tabCount">0</span></button>
   </div>
 </nav>
+</div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -10515,7 +10523,8 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     if (camOn) { paused = true; video.pause(); }
     refreshScanUI();
     try { if (navigator.vibrate) navigator.vibrate(40); } catch (e) {}
-    $('result').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    var sc = $('scroller');
+    try { sc.scrollTo({ top: sc.scrollHeight, behavior: 'smooth' }); } catch (e) { sc.scrollTop = sc.scrollHeight; }
   }
   function resumeAfterDecision(coolMs) {
     cool = { text: pending ? pending.text : '', until: Date.now() + coolMs };
@@ -10711,8 +10720,14 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     $('tabList').setAttribute('aria-selected', scan ? 'false' : 'true');
     if (scan) { startCamera(); }
     else { stopCamera(); renderList(); }
-    window.scrollTo(0, 0);
+    $('scroller').scrollTop = 0;
+    resetPage();
   }
+
+  /* 画面全体が万一ずれても元に戻す（キーボードを閉じた直後など） */
+  function resetPage() { if (window.scrollX || window.scrollY) window.scrollTo(0, 0); }
+  document.addEventListener('focusout', function () { setTimeout(resetPage, 60); });
+  window.addEventListener('pageshow', resetPage);
 
   /* ---------- イベント ---------- */
   $('btnStart').addEventListener('click', startCamera);
