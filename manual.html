@@ -52,7 +52,8 @@
   a:focus-visible, summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
 
   header.top { padding: 14px 0 6px; }
-  header.top .back { display: inline-block; font-size: 14px; font-weight: 600; padding: 6px 2px; }
+  header.top .back { display: inline-block; font: inherit; font-size: 14px; font-weight: 600; padding: 6px 2px;
+                    background: none; border: 0; color: var(--heading); text-decoration: underline; cursor: pointer; }
   header.top h1 { margin: 2px 0 0; font-size: 24px; line-height: 1.4; color: var(--heading); }
   header.top .lead { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
 
@@ -103,8 +104,13 @@
   details > div > :first-child { margin-top: 0; }
 
   footer { margin-top: 36px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
-  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 20px; border-radius: 12px;
+  .btn { border: 0; font: inherit; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 20px; border-radius: 12px;
          background: var(--brand); color: var(--brand-ink); font-weight: 700; text-decoration: none; }
+
+  .close-msg { position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 20; margin: 0 auto; max-width: 560px;
+               background: var(--forest); color: var(--mist); border-radius: 14px; padding: 12px 16px; font-size: 14px; line-height: 1.6;
+               box-shadow: var(--shadow); }
+  .close-msg[hidden] { display: none; }
 
   @media print {
     html, body { height: auto; overflow: visible; position: static; }
@@ -113,7 +119,7 @@
     details { break-inside: avoid; }
     details > div { display: block; }
     figure.shot { break-inside: avoid; }
-    .back, footer .btn { display: none; }
+    .back, footer .btn, .close-msg { display: none; }
   }
 </style>
 </head>
@@ -122,7 +128,7 @@
 <div class="wrap">
 
   <header class="top">
-    <a class="back" href="index.html">← アプリにもどる</a>
+    <button type="button" class="back js-close">× このページを閉じる</button>
     <h1>来場者スキャン 使い方</h1>
     <p class="lead">DIA日本年会 2026 ブース用／iPhoneのChromeで使います</p>
   </header>
@@ -345,10 +351,44 @@
   </section>
 
   <footer>
-    <p>来場者スキャン（DIA日本年会 2026 ブース用）　版 1006b</p>
-    <a class="btn" href="index.html">アプリにもどる</a>
+    <p>来場者スキャン（DIA日本年会 2026 ブース用）　版 1006c</p>
+    <button type="button" class="btn js-close">このページを閉じる</button>
   </footer>
 </div>
 </div>
+<p class="close-msg" id="closeMsg" role="status" hidden>このページを自動で閉じられませんでした。画面下のタブのボタンから、このタブを閉じてください。アプリの画面は別のタブで開いたままです。</p>
+<script>
+(function () {
+  'use strict';
+  var page = document.getElementById('page');
+  var msg = document.getElementById('closeMsg');
+  var msgTimer = 0;
+
+  // 「このページを閉じる」：アプリから別タブで開いているので、タブを閉じてアプリに戻す
+  function closePage() {
+    try { window.close(); } catch (e) {}
+    // 閉じられなかった場合（直接URLで開いた等）は案内を出す
+    clearTimeout(msgTimer);
+    msgTimer = setTimeout(function () {
+      msg.hidden = false;
+      setTimeout(function () { msg.hidden = true; }, 8000);
+    }, 400);
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.js-close'), function (b) {
+    b.addEventListener('click', closePage);
+  });
+
+  // 目次リンク：履歴を増やさずに移動する（履歴が増えるとタブを閉じられなくなるため）
+  Array.prototype.forEach.call(document.querySelectorAll('a[href^="#"]'), function (a) {
+    a.addEventListener('click', function (ev) {
+      var t = document.getElementById(a.getAttribute('href').slice(1));
+      if (!t) return;
+      ev.preventDefault();
+      var top = t.getBoundingClientRect().top - page.getBoundingClientRect().top + page.scrollTop - 12;
+      page.scrollTop = Math.max(0, top);
+    });
+  });
+})();
+</script>
 </body>
 </html>
