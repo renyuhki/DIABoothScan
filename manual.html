@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#004F4B">
+<meta name="robots" content="noindex,nofollow">
+<title>来場者スキャン 使い方</title>
+<style>
+  /* CRScube ブランドカラー（アプリ本体 index.html と同じ配色） */
+  :root {
+    --mint: #00D582; --forest: #004F4B; --lime: #81FFAC; --mist: #DCFFE9; --grey: #464657;
+    --bg: var(--mist);
+    --surface: #FFFFFF;
+    --ink: var(--grey);
+    --heading: var(--forest);
+    --muted: #5C5C6E;
+    --line: #B3E3C7;
+    --tint: #EEFFF4;
+    --brand: var(--forest);
+    --brand-ink: #FFFFFF;
+    --warn-bg: #FFF4D6; --warn-ink: #5C4300; --warn-line: #E8CD7A;
+    --danger: #B3261E;
+    --focus: var(--forest);
+    --shadow: 0 2px 10px rgba(0, 79, 75, .18);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #002826; --surface: #003D3A; --ink: var(--mist); --heading: #FFFFFF; --muted: #9ED8BC;
+      --line: #0D6660; --tint: #004F4B; --brand: var(--mint); --brand-ink: #002826;
+      --warn-bg: #3A2F10; --warn-ink: #F3DC9B; --warn-line: #6B5A22;
+      --danger: #FF8A80; --focus: var(--lime); --shadow: 0 2px 10px rgba(0, 0, 0, .45);
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: 12px; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+    font-size: 16px; line-height: 1.75; -webkit-text-size-adjust: 100%;
+    padding: env(safe-area-inset-top, 0px) 0 calc(32px + env(safe-area-inset-bottom, 0px));
+  }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 0 16px; }
+  a { color: var(--heading); }
+  a:focus-visible, summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+
+  header.top { padding: 14px 0 6px; }
+  header.top .back { display: inline-block; font-size: 14px; font-weight: 600; padding: 6px 2px; }
+  header.top h1 { margin: 2px 0 0; font-size: 24px; line-height: 1.4; color: var(--heading); }
+  header.top .lead { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+
+  nav.toc { margin: 14px 0 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px; }
+  nav.toc p { margin: 0 0 4px; font-size: 13px; color: var(--muted); font-weight: 600; }
+  nav.toc ol { margin: 0; padding-left: 1.3em; }
+  nav.toc li { padding: 1px 0; }
+
+  h2 { margin: 32px 0 10px; font-size: 20px; line-height: 1.4; color: var(--heading);
+       display: flex; align-items: center; gap: 10px; }
+  h2 .no { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--brand); color: var(--brand-ink);
+           font-size: 16px; display: inline-flex; align-items: center; justify-content: center; }
+  h3 { margin: 22px 0 6px; font-size: 17px; color: var(--heading); }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0; padding-left: 1.4em; }
+  li { margin: 3px 0; }
+
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; margin: 12px 0; }
+  .summary { border: 2px solid var(--mint); }
+  .summary ol { margin: 4px 0 0; }
+  .summary li { font-weight: 600; color: var(--heading); }
+
+  .note { background: var(--warn-bg); color: var(--warn-ink); border: 1px solid var(--warn-line); border-radius: 12px; padding: 10px 14px; margin: 12px 0; font-size: 15px; }
+  .note strong { color: inherit; }
+  .tip { background: var(--tint); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; margin: 12px 0; font-size: 15px; }
+
+  /* 画面写真 */
+  figure.shot { margin: 14px auto; text-align: center; }
+  figure.shot img { display: block; width: 100%; max-width: 250px; height: auto; margin: 0 auto;
+                    border-radius: 22px; border: 1px solid var(--line); box-shadow: var(--shadow); background: var(--surface); }
+  figure.shot.tall img { max-width: 250px; }
+  figure.shot figcaption { margin-top: 8px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  /* 画面上のボタン名 */
+  kbd, .btnname { display: inline-block; font: inherit; font-size: .92em; font-weight: 700; color: var(--heading);
+                  background: var(--surface); border: 1.5px solid var(--heading); border-radius: 8px; padding: 0 8px; margin: 0 1px; line-height: 1.55; white-space: nowrap; }
+  .btnname.fill { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 8px 0; background: var(--surface); border-radius: 10px; overflow: hidden; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--tint); color: var(--heading); white-space: nowrap; }
+  tr:last-child td { border-bottom: 0; }
+  .scroll-x { overflow-x: auto; }
+
+  details { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; margin: 8px 0; }
+  summary { cursor: pointer; padding: 12px 14px; font-weight: 700; color: var(--heading); list-style-position: inside; min-height: 48px; }
+  details > div { padding: 0 16px 12px; }
+  details > div > :first-child { margin-top: 0; }
+
+  footer { margin-top: 36px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 20px; border-radius: 12px;
+         background: var(--brand); color: var(--brand-ink); font-weight: 700; text-decoration: none; }
+
+  @media print {
+    body { background: #fff; color: #000; font-size: 12px; }
+    details { break-inside: avoid; }
+    details > div { display: block; }
+    figure.shot { break-inside: avoid; }
+    .back, footer .btn { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <a class="back" href="index.html">← アプリにもどる</a>
+    <h1>来場者スキャン 使い方</h1>
+    <p class="lead">DIA日本年会 2026 ブース用／iPhoneのChromeで使います</p>
+  </header>
+
+  <div class="card summary">
+    <strong style="color:var(--heading)">まずはこの3つだけ</strong>
+    <ol>
+      <li>名札のQRコードを写して、内容を確認し<span class="btnname fill">保存</span>を押す</li>
+      <li>気づいたことは、あとで<strong>一覧</strong>でメモに残す</li>
+      <li><strong>毎日の終わりに</strong>、一覧から<span class="btnname">CSVを書き出す</span></li>
+    </ol>
+  </div>
+
+  <nav class="toc" aria-label="目次">
+    <p>目次</p>
+    <ol>
+      <li><a href="#s1">はじめに（最初の1回だけ）</a></li>
+      <li><a href="#s2">QRコードを読み取って保存する</a></li>
+      <li><a href="#s3">一覧で確認する・メモを書く・削除する</a></li>
+      <li><a href="#s4">CSVを書き出す（毎日の終わりに）</a></li>
+      <li><a href="#s5">大事な注意事項</a></li>
+      <li><a href="#s6">うまくいかないとき</a></li>
+    </ol>
+  </nav>
+
+  <!-- 1 -->
+  <section id="s1">
+    <h2><span class="no">1</span>はじめに（最初の1回だけ）</h2>
+    <ol>
+      <li>案内されたURLを、iPhoneの<strong>Chrome</strong>で開きます。</li>
+      <li>カメラの許可を聞かれたら<strong>「許可」</strong>を選びます。</li>
+    </ol>
+    <p>毎回URLを入れなくてすむよう、ブックマークなどに登録しておくと便利です。</p>
+    <div class="tip">
+      <strong>いつも「同じブラウザ・同じURL」で開いてください。</strong><br>
+      記録はそのブラウザの中に保存されます。SafariとChromeを使い分けたり、別のURLで開いたりすると、前に保存した記録が見えなくなります。
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section id="s2">
+    <h2><span class="no">2</span>QRコードを読み取って保存する</h2>
+
+    <h3>① カメラを起動する</h3>
+    <p><span class="btnname fill" style="background:var(--mint);border-color:var(--mint);color:var(--forest)">カメラを起動</span>を押します。画面にカメラの映像が出ます。</p>
+    <figure class="shot">
+      <img src="images/01-scan-start.png" alt="スキャン画面。中央にカメラを起動ボタンがある" width="520" height="1125">
+      <figcaption>最初のスキャン画面</figcaption>
+    </figure>
+
+    <h3>② 名札のQRコードを写す</h3>
+    <p>来場者の名札のQRコードを、画面の枠の中に入れます。読み取れると自動で止まり、<strong>内容と読み取り日時</strong>が表示されます。</p>
+
+    <h3>③ 内容を確認して「保存」</h3>
+    <p>会社名・所属・氏名・メールアドレスなどが表示されます。内容を見て、<span class="btnname fill">保存</span>を押します。</p>
+    <figure class="shot">
+      <img src="images/02-scan-result.png" alt="読み取り結果の画面。読み取り内容と日時、保存ボタン、破棄して読み直すボタンが表示されている" width="520" height="1125">
+      <figcaption>読み取り結果の確認画面（内容はサンプルです）</figcaption>
+    </figure>
+    <ul>
+      <li><span class="btnname">破棄して読み直す</span>…保存せずにやり直したいとき。</li>
+      <li>保存すると「保存しました」と表示され、<strong>そのまま次の人の読み取り待ち</strong>になります。</li>
+      <li>保存した直後の数秒間は、同じQRコードを読み取りません（二重登録の防止）。</li>
+    </ul>
+    <figure class="shot">
+      <img src="images/03-saved-toast.png" alt="保存直後の画面。下部に「保存しました」と表示されている" width="520" height="1125">
+      <figcaption>保存直後</figcaption>
+    </figure>
+
+    <div class="note">
+      <strong>読み取ったら、すぐ「保存」を押してください。</strong><br>
+      保存する前にページを開き直したり、長く他のアプリに切り替えたりすると、その内容は消えてしまいます。
+    </div>
+
+    <h3>知っておくと便利なこと</h3>
+    <ul>
+      <li><strong>同じ人が何度か来たとき</strong>は、そのたびに別の記録として残ります（まとめられません）。</li>
+      <li>他のアプリに切り替える、画面を閉じる、一覧画面に移ると、<strong>カメラは止まります</strong>。スキャン画面にもどって<span class="btnname">カメラを起動</span>で再開できます。</li>
+      <li>カメラで読めないときは、<span class="btnname">画像から読み取る</span>でQRコードの写真から読み取れます。</li>
+    </ul>
+  </section>
+
+  <!-- 3 -->
+  <section id="s3">
+    <h2><span class="no">3</span>一覧で確認する・メモを書く・削除する</h2>
+    <p>画面下の<span class="btnname">一覧</span>タブを押すと、保存した来場者が<strong>新しい順</strong>に並びます。</p>
+    <figure class="shot">
+      <img src="images/04-list.png" alt="一覧画面。件数、未書き出し件数、表示する日、CSVを書き出すボタン、来場者のリストが表示されている" width="520" height="1125">
+      <figcaption>一覧画面（内容はサンプルです）</figcaption>
+    </figure>
+    <table>
+      <tbody>
+        <tr><th>件数</th><td>画面左上に、表示中の件数が出ます。</td></tr>
+        <tr><th>未書き出し</th><td>赤字の「未書き出し ○ 件」は、まだCSVにしていない記録の数です。CSVを書き出すと「すべて書き出し済み」になります。</td></tr>
+        <tr><th>表示する日</th><td>日付を選ぶと、その日の分だけ表示します（CSVもその日の分だけになります）。</td></tr>
+        <tr><th>メモあり</th><td>メモを書いた記録には「メモあり」の印がつきます。</td></tr>
+      </tbody>
+    </table>
+
+    <h3>メモを書く</h3>
+    <p>記録を押すと開きます。<strong>メモ</strong>の欄に、「資料送付希望」「来週フォロー」など、あとで役立つことを書いておけます。入力すると<strong>自動で保存</strong>されます（保存ボタンはありません）。</p>
+    <figure class="shot tall">
+      <img src="images/05-list-open.png" alt="記録を開いた画面。読み取り内容の下にメモ欄とこの1件を削除ボタンがある" width="520" height="1413">
+      <figcaption>記録を開いたところ（内容はサンプルです）</figcaption>
+    </figure>
+
+    <h3>1件だけ削除する</h3>
+    <p>開いた記録の下にある<span class="btnname">この1件を削除</span>を押します。確認のメッセージが出ます。</p>
+
+    <div class="tip">
+      <strong>だれが来たかを担当者どうしで共有したいとき</strong><br>
+      記録は各自のiPhoneの中だけにあり、他の担当者の画面には出ません。お互いに<strong>一覧画面を見せ合って</strong>共有してください。
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section id="s4">
+    <h2><span class="no">4</span>CSVを書き出す（毎日の終わりに）</h2>
+    <p>CSVは、あとで来場者リストをつくるための<strong>保存用ファイル</strong>です。万一のとき（記録が消えたとき）のバックアップにもなります。<strong>毎日の終わりに必ず</strong>書き出してください。</p>
+    <ol>
+      <li><span class="btnname">一覧</span>タブを開く。</li>
+      <li>「表示する日」を選ぶ（<strong>すべて</strong>なら全件、日付なら<strong>その日の分</strong>）。</li>
+      <li><span class="btnname fill">CSVを書き出す</span>を押す。</li>
+      <li>共有のメニューが出たら、<strong>「“ファイル”に保存」</strong>を選び、保存先を決めて保存する。</li>
+      <li>画面に「書き出しました」と出て、「未書き出し」の件数が減ったことを確認する。</li>
+    </ol>
+
+    <h3>CSVの中身</h3>
+    <div class="scroll-x">
+      <table>
+        <thead><tr><th>読み取り日時</th><th>読み取り内容</th><th>メモ</th></tr></thead>
+        <tbody>
+          <tr><td>2026/10/18 10:32:15</td><td>会社名・所属・氏名・メールアドレス（QRの内容そのまま）</td><td>（書いたメモ）</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>ファイル名は <code>dia2026_visitors_…</code> で始まり、日付と時刻が入ります。ExcelやGoogleスプレッドシートで開けます。</p>
+
+    <div class="note">
+      <strong>書き出したあとにメモを足した記録は、もう一度「未書き出し」にもどります。</strong>最後にもう一度、書き出しておくと安心です。
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section id="s5">
+    <h2><span class="no">5</span>大事な注意事項</h2>
+    <ul>
+      <li><strong>記録は、このiPhoneのChromeの中だけに保存されます。</strong>インターネット上のサーバーには送られません。</li>
+      <li>次のことをすると、<strong>保存した記録が消えます</strong>。
+        <ul>
+          <li>Chromeの履歴・サイトデータ・Cookieなどを消去する</li>
+          <li><span class="btnname">全件を削除</span>を押す（確認が2回出ます）</li>
+        </ul>
+      </li>
+      <li>「プライベートブラウズ（シークレットタブ）」では使えません。通常のタブで開いてください。</li>
+      <li>来場者の<strong>氏名・メールアドレスなどの個人情報</strong>が入っています。画面を来場者や関係のない人に見せない、CSVの保存・共有は社内の個人情報の取り扱いルールに従う、を守ってください。</li>
+    </ul>
+
+    <h3>イベント終了後</h3>
+    <ol>
+      <li>最後にCSVを書き出し、「すべて書き出し済み」になっていることを確認する。</li>
+      <li>CSVの共有・提出は、別途ご案内する方法で行う。</li>
+      <li>共有・提出が終わったら、<span class="btnname">全件を削除</span>で各自のiPhoneの記録を消す。</li>
+    </ol>
+    <p style="font-size:14px;color:var(--muted)">※ 先に「全件を削除」をしないでください。消した記録は元にもどせません。</p>
+  </section>
+
+  <!-- 6 -->
+  <section id="s6">
+    <h2><span class="no">6</span>うまくいかないとき</h2>
+
+    <details>
+      <summary>QRコードを読み取ってくれない</summary>
+      <div>
+        <ul>
+          <li>QRコード全体が、画面の枠に入っているか確認する。</li>
+          <li>近すぎるとピントが合いません。少し離してみる。</li>
+          <li>名札を平らにして、明るい場所で。照明が名札に反射しているときは、角度を変える。</li>
+          <li>それでもだめなときは、QRコードをiPhoneの標準カメラで撮影し、<span class="btnname">画像から読み取る</span>で選ぶ。</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>カメラが起動しない／画面が真っ暗</summary>
+      <div>
+        <ul>
+          <li>カメラの許可が必要です。iPhoneの<strong>「設定」→「Chrome」→「カメラ」</strong>がオンになっているか確認する。</li>
+          <li>ほかのアプリがカメラを使っていないか確認する。</li>
+          <li>ページを開き直して、<span class="btnname">カメラを起動</span>をもう一度押す。</li>
+          <li>アドレスが <code>https://</code> で始まっているか確認する。</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>「この環境では保存領域を使えません」と出る</summary>
+      <div>
+        <p>プライベートブラウズ（シークレットタブ）で開いている可能性があります。いったん閉じて、<strong>通常のタブ</strong>で開き直してください。</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>前に保存した記録が見えない</summary>
+      <div>
+        <ul>
+          <li>前回と<strong>同じブラウザ（Chrome）・同じURL</strong>で開いているか確認する。</li>
+          <li>「表示する日」が、見たい日になっているか確認する（<strong>すべて</strong>にすると全件出ます）。</li>
+          <li>Chromeの履歴・サイトデータを消去していないか確認する。消えてしまった場合は、書き出し済みのCSVを確認する。</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>CSVの書き出しで共有メニューが出ない</summary>
+      <div>
+        <p>iPhoneの設定によっては、メニューが出ずにファイルが直接保存されることがあります。「ファイル」アプリの中を確認してください。それでも見つからないときは、書き出しをやり直してください。</p>
+      </div>
+    </details>
+  </section>
+
+  <footer>
+    <p>来場者スキャン（DIA日本年会 2026 ブース用）</p>
+    <a class="btn" href="index.html">アプリにもどる</a>
+  </footer>
+</div>
+</body>
+</html>

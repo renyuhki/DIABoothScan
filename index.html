@@ -54,7 +54,11 @@
   header.top h1 { margin: 0; font-size: 19px; font-weight: 700; color: var(--heading); line-height: 1.35; }
   header.top .sub { margin: 0; color: var(--muted); font-size: 12px; }
   header.top .logo { flex: none; display: block; }
-  header.top .logo img { display: block; height: 20px; width: auto; }
+  header.top .ttl { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 8px; }
+  header.top .ttl h1 { white-space: nowrap; }
+  header.top .help { flex: none; display: inline-flex; align-items: center; gap: 3px; min-height: 26px; padding: 0 8px 0 4px; border: 1.5px solid var(--heading); border-radius: 999px; color: var(--heading); font-size: 12px; font-weight: 700; text-decoration: none; line-height: 1; white-space: nowrap; }
+  header.top .help .q { width: 16px; height: 16px; border-radius: 50%; background: var(--heading); color: var(--bg); font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; }
+  header.top .help:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 
   button, .btn { font: inherit; -webkit-tap-highlight-color: transparent; }
   .btn {
@@ -186,7 +190,10 @@
 <div class="wrap">
   <header class="top">
     <div>
-      <h1>来場者スキャン</h1>
+      <div class="ttl">
+        <h1>来場者スキャン</h1>
+        <a class="help" href="manual.html" target="_blank" rel="noopener"><span class="q" aria-hidden="true">?</span>使い方</a>
+      </div>
       <p class="sub">DIA日本年会 2026 ブース用</p>
     </div>
     <picture class="logo">
