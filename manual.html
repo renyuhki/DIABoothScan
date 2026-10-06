@@ -33,12 +33,19 @@
     }
   }
   * { box-sizing: border-box; }
-  html { scroll-padding-top: 12px; }
+  /* 画面全体（document）はスクロールさせず、内側の .page だけをスクロールさせる。
+     ブラウザのバーの出し入れでページの先頭がずれて戻れなくなるのを防ぐ */
+  html, body { margin: 0; height: 100%; overflow: hidden; overscroll-behavior: none; }
   body {
-    margin: 0; background: var(--bg); color: var(--ink);
+    position: fixed; inset: 0; width: 100%;
+    background: var(--bg); color: var(--ink);
     font-family: -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
     font-size: 16px; line-height: 1.75; -webkit-text-size-adjust: 100%;
-    padding: env(safe-area-inset-top, 0px) 0 calc(32px + env(safe-area-inset-bottom, 0px));
+  }
+  .page {
+    position: absolute; inset: 0; overflow-x: hidden; overflow-y: auto;
+    -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+    scroll-padding-top: 12px; padding-bottom: 32px;
   }
   .wrap { max-width: 640px; margin: 0 auto; padding: 0 16px; }
   a { color: var(--heading); }
@@ -100,6 +107,8 @@
          background: var(--brand); color: var(--brand-ink); font-weight: 700; text-decoration: none; }
 
   @media print {
+    html, body { height: auto; overflow: visible; position: static; }
+    .page { position: static; overflow: visible; padding-bottom: 0; }
     body { background: #fff; color: #000; font-size: 12px; }
     details { break-inside: avoid; }
     details > div { display: block; }
@@ -109,6 +118,7 @@
 </style>
 </head>
 <body>
+<div class="page" id="page">
 <div class="wrap">
 
   <header class="top">
@@ -335,9 +345,10 @@
   </section>
 
   <footer>
-    <p>来場者スキャン（DIA日本年会 2026 ブース用）</p>
+    <p>来場者スキャン（DIA日本年会 2026 ブース用）　版 1006b</p>
     <a class="btn" href="index.html">アプリにもどる</a>
   </footer>
+</div>
 </div>
 </body>
 </html>
