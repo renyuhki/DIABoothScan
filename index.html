@@ -10648,7 +10648,7 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     list.slice().sort(function (a, b) { return a.ts < b.ts ? -1 : a.ts > b.ts ? 1 : 0; }).forEach(function (e) {
       rows.push([fmtDateTime(new Date(e.ts)), e.text, e.memo || '']);
     });
-    return '\uFEFF' + rows.map(function (r) { return r.map(csvCell).join(','); }).join('\r\n') + '\r\n';
+    return rows.map(function (r) { return r.map(csvCell).join(','); }).join('\r\n') + '\r\n';
   }
   function markExported(list) {
     var now = new Date().toISOString();
@@ -10668,7 +10668,10 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
     var now = new Date();
     var name = 'dia2026_visitors_' + (filterDay === 'all' ? 'all' : filterDay) + '_' +
       now.getFullYear() + pad(now.getMonth() + 1) + pad(now.getDate()) + '-' + pad(now.getHours()) + pad(now.getMinutes()) + '.csv';
-    var blob = new Blob([buildCsv(list)], { type: 'text/csv;charset=utf-8' });
+    // BOM(EF BB BF)をバイトとして直接先頭に書き込み、本文はUTF-8のバイト列にしてから渡す
+    var BOM = new Uint8Array([0xEF, 0xBB, 0xBF]);
+    var body = new TextEncoder().encode(buildCsv(list));
+    var blob = new Blob([BOM, body], { type: 'text/csv' });
     var file = null;
     try { file = new File([blob], name, { type: 'text/csv' }); } catch (e) {}
     if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
